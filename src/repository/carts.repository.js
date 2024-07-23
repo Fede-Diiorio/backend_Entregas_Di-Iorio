@@ -14,14 +14,22 @@ class CartRepository {
     async #verifyCartExists(cartId) {
         try {
             const cart = await this.#cartDAO.getCartById(cartId);
+            if (cart === null) {
+                throw CustomError.createError({
+                    cause: 'El ID proporcionado no existe en la base de datos.',
+                    code: ErrorCodes.UNDEFINED_CART,
+                    status: 404
+                })
+            }
             return cart;
-        } catch {
+
+        } catch (error) {
             throw CustomError.createError({
-                name: 'cartID inválido',
-                cause: 'Debe ingresar un ID válido existente en la base de datos',
+                name: 'CartId no encontrado',
+                cause: error.cause || 'El ID proporcionado no corresponde a ningún carrito en la base de datos',
                 message: 'El carrito no existe',
-                code: ErrorCodes.UNDEFINED_CART,
-                status: 404
+                code: error.code || ErrorCodes.UNDEFINED_CART,
+                status: error.status || 500
             })
         }
     }
@@ -29,14 +37,21 @@ class CartRepository {
     async #verifyProductExists(productId) {
         try {
             const product = await this.#productDAO.getProductById(productId);
+            if (product === null) {
+                throw CustomError.createError({
+                    cause: 'El ID proporcionado no existe en la base de datos.',
+                    code: ErrorCodes.UNDEFINED_PRODUCT,
+                    status: 404
+                });
+            }
             return product;
-        } catch {
+        } catch (error) {
             throw CustomError.createError({
                 name: 'productID inválido',
-                cause: 'Debe ingresar un ID válido existente en la base de datos',
+                cause: error.cause || 'El ID proporcionado no corresponde a ningún producto en la base de datos',
                 message: 'El producto no existe',
-                code: ErrorCodes.UNDEFINED_PRODUCT,
-                status: 404
+                code: error.code || ErrorCodes.DATABASE_ERROR,
+                status: error.status || 500
             });
         }
     }
@@ -98,8 +113,10 @@ class CartRepository {
     async addProductToCart(productId, cartId, user) {
 
         const product = await this.#verifyProductExists(productId);
+        console.log('PORDUCT' + product)
         const cart = await this.#verifyCartExists(cartId);
-        if (product.owner && product.owner === user.email) {
+        console.log('CART' + cart)
+        if (product && product.owner && product.owner === user.email) {
             throw CustomError.createError({
                 name: 'Permiso denegado',
                 cause: 'No puede agregar al carrito productos que están creados por el mismo usuario que está utilizando',

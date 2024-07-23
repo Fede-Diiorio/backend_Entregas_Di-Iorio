@@ -1,11 +1,16 @@
 const { UserRepository } = require('../repository/user.repository');
+const UserDAO = require('../dao/mongo/users.dao');
+const CartDAO = require('../dao/mongo/carts.dao');
+
+const userDAO = new UserDAO();
+const cartDAO = new CartDAO();
 
 class Controller {
 
     #userRepository
 
     constructor() {
-        this.#userRepository = new UserRepository();
+        this.#userRepository = new UserRepository(userDAO, cartDAO);
     }
 
     async registerUser(req, res) {

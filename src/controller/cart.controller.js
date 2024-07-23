@@ -2,14 +2,16 @@ const { CartRepository } = require('../repository/carts.repository');
 const { TicketRepository } = require('../repository/ticket.repository');
 const CartDAO = require('../dao/mongo/carts.dao');
 const ProductDAO = require('../dao/mongo/products.dao');
+const TicketDAO = require('../dao/mongo/ticket.dao');
 
 const cartDAO = new CartDAO();
 const productDAO = new ProductDAO();
+const ticketDAO = new TicketDAO();
 
 class Controller {
     constructor() {
         this.cartRepository = new CartRepository(cartDAO, productDAO);
-        this.ticketRepository = new TicketRepository();
+        this.ticketRepository = new TicketRepository(ticketDAO, productDAO, cartDAO);
     }
 
     async getCarts(req, res) {

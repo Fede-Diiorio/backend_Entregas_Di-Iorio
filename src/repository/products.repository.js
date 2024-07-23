@@ -96,6 +96,16 @@ class ProductRepository {
 
         const user = await this.#userDAO.findByEmail(owner);
 
+        if (user === null) {
+            throw CustomError.createError({
+                name: 'Usuario inválido',
+                cause: 'El email proporcionado no se encuentra registrado en la base de datos',
+                message: 'El usuaior no existe',
+                code: ErrorCodes.UNDEFINED_USER,
+                status: 404
+            })
+        }
+
         const finalOwner = user && user.rol === 'premium' ? user.email : 'admin';
 
         const existingCode = await this.productDAO.findByCode(code);

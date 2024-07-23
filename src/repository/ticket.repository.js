@@ -1,18 +1,15 @@
-const TicketDAO = require('../dao/mongo/ticket.dao');
-const { CartRepository } = require('./carts.repository')
-const ProductDAO = require('../dao/mongo/products.dao');
 const { CustomError } = require('../utils/errors/customErrors');
 const { ErrorCodes } = require('../utils/errors/errorCodes');
 
 class TicketRepository {
     #ticketDAO
     #productDAO
-    #cartRepository
+    #CartDAO
 
-    constructor() {
-        this.#ticketDAO = new TicketDAO();
-        this.#productDAO = new ProductDAO();
-        this.#cartRepository = new CartRepository();
+    constructor(TicketDAO, ProductDAO, CartDAO) {
+        this.#ticketDAO = TicketDAO;
+        this.#productDAO = ProductDAO;
+        this.#CartDAO = CartDAO;
     }
 
     #generateUniqueCode() {
@@ -21,7 +18,7 @@ class TicketRepository {
 
     async #findCartById(cartId) {
         try {
-            const cart = await this.#cartRepository.getCartById(cartId);
+            const cart = await this.#CartDAO.getCartById(cartId);
             return cart
         } catch {
             throw CustomError.createError({
@@ -72,7 +69,7 @@ class TicketRepository {
 
             const ticket = await this.#ticketDAO.addTicket(ticketData);
 
-            await this.#cartRepository.clearCart(cartId)
+            await this.#CartDAO.clearCart(cartId)
 
             return ticket;
         } catch (error) {

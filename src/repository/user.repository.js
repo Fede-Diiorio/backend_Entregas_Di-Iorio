@@ -1,6 +1,4 @@
 require('dotenv').config();
-const UserDAO = require('../dao/mongo/users.dao');
-const CartDAO = require('../dao/mongo/carts.dao');
 const { hashPassword, isValidPassword } = require('../utils/hashing');
 const { generateToken, generatePasswordRecoveryToken } = require('../middlewares/jwt.middleware');
 const { UserDTO } = require('../dto/user.dto');
@@ -16,9 +14,9 @@ class UserRepository {
     #adminUser;
     #superAdminUser;
 
-    constructor() {
-        this.#userDAO = new UserDAO();
-        this.#cartDAO = new CartDAO();
+    constructor(UserDAO, CartDAO) {
+        this.#userDAO = UserDAO;
+        this.#cartDAO = CartDAO;
 
         this.#adminUser = {
             _id: 'admin',
