@@ -1,9 +1,14 @@
 const { ProductRepository } = require('../repository/products.repository');
 const { generateProduct } = require('../utils/generatePoduct');
+const ProductDAO = require('../dao/mongo/products.dao');
+const UserDAO = require('../dao/mongo/users.dao');
+
+const productDAO = new ProductDAO();
+const userDAO = new UserDAO();
 
 class Controller {
     constructor() {
-        this.productRepository = new ProductRepository();
+        this.productRepository = new ProductRepository(productDAO, userDAO);
     }
 
     async getProducts(req, res) {

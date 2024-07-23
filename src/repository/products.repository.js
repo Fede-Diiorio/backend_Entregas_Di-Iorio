@@ -1,5 +1,3 @@
-const ProductDAO = require('../dao/mongo/products.dao');
-const UserDAO = require('../dao/mongo/users.dao');
 const { ProductDTO } = require('../dto/product.dto');
 const { CustomError } = require('../utils/errors/customErrors');
 const { ErrorCodes } = require('../utils/errors/errorCodes');
@@ -7,9 +5,9 @@ const { generateInvalidProductData } = require('../utils/errors/errors');
 
 class ProductRepository {
     #userDAO
-    constructor() {
-        this.productDAO = new ProductDAO();
-        this.#userDAO = new UserDAO();
+    constructor(ProductDAO, UserDAO) {
+        this.productDAO = ProductDAO;
+        this.#userDAO = UserDAO;
     }
 
     #validateAndFormatGetProductsParams(page, limit, sort, category, availability) {

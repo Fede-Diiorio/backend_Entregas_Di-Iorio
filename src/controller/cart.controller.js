@@ -1,9 +1,14 @@
 const { CartRepository } = require('../repository/carts.repository');
 const { TicketRepository } = require('../repository/ticket.repository');
+const CartDAO = require('../dao/mongo/carts.dao');
+const ProductDAO = require('../dao/mongo/products.dao');
+
+const cartDAO = new CartDAO();
+const productDAO = new ProductDAO();
 
 class Controller {
     constructor() {
-        this.cartRepository = new CartRepository();
+        this.cartRepository = new CartRepository(cartDAO, productDAO);
         this.ticketRepository = new TicketRepository();
     }
 

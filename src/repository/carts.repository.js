@@ -1,16 +1,14 @@
-const CartDAO = require('../dao/mongo/carts.dao');
-const { ProductRepository } = require('./products.repository');
 const { CustomError } = require('../utils/errors/customErrors');
 const { ErrorCodes } = require('../utils/errors/errorCodes');
 
 class CartRepository {
 
     #cartDAO;
-    #productRepository;
+    #productDAO;
 
-    constructor() {
-        this.#cartDAO = new CartDAO();
-        this.#productRepository = new ProductRepository();
+    constructor(CartDAO, ProductDAO) {
+        this.#cartDAO = CartDAO;
+        this.#productDAO = ProductDAO;
     }
 
     async #verifyCartExists(cartId) {
@@ -30,7 +28,7 @@ class CartRepository {
 
     async #verifyProductExists(productId) {
         try {
-            const product = await this.#productRepository.getProductById(productId);
+            const product = await this.#productDAO.getProductById(productId);
             return product;
         } catch {
             throw CustomError.createError({
