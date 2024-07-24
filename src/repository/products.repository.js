@@ -157,6 +157,7 @@ class ProductRepository {
             return products.docs.map(product => new ProductDTO(product));
 
         } catch (error) {
+            console.error('Error en getProducts:', error);
             throw CustomError.createError({
                 name: 'Error al conectar',
                 cause: 'Ocurrió un error al buscar los productos en la base de datos',

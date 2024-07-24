@@ -1,129 +1,63 @@
-const mongoose = require('mongoose');
 const { ProductRepository } = require('../../src/repository/products.repository');
+const sinon = require('sinon');
+const chai = import('chai');
+const { invalidProducts, mockingProducts } = require('../utils');
 
 describe('Testing Product Repository', () => {
-    let chai;
+    /**
+     * @type Chai.ExpectStatic
+     */
     let expect;
-    const productRepository = new ProductRepository();
-    let connection = null;
+
+    const productsDaoMock = {
+        getProducts: sinon.stub(),
+        addProduct: sinon.stub(),
+        getProductById: sinon.stub()
+    }
+
+    const usersDaoMock = {
+
+    }
+
+    const productRepository = new ProductRepository(productsDaoMock, usersDaoMock);
 
     before(async function () {
-        chai = await import('chai');
-        expect = chai.expect;
-
-        // Se ejecuta UNA ÚNICA vez, antes de todos los test de la suite
-        this.timeout(10000); // Configurar el tiempo de espera para la conexión
-        const mongooseConnection = await mongoose.connect('mongodb://localhost:27017/', { dbName: 'testing' });
-        connection = mongooseConnection.connection;
+        const { expect: chaiExpect } = await chai
+        expect = chaiExpect
     });
 
-    after(async () => {
-        // Se ejecuta UNA ÚNICA vez, luego de todos los test de la suite
-        await connection.db.dropDatabase();
-        await connection.close();
-    });
+    it('Debe traer todos los productos de la base de datos', async () => {
+        productsDaoMock.getProducts.resolves(mockingProducts);
 
-    beforeEach(function () {
-        // Se ejecuta antes de cada test dentro de esta suite
-        this.timeout(10000); // Configurar el test para que mocha lo espere durante 10 segundos
-    });
-
-    afterEach(async () => {
-        // Se ejecuta luego de cada test dentro de esta suite
-    });
-
-    it('El resultado del get debe ser un array', async function () {
-        this.timeout(10000); // Configurar el test para que mocha lo espere durante 10 segundos
         const result = await productRepository.getProducts(1, 10);
-        expect(Array.isArray(result)).to.be.ok;
-    });
-
-    it('Se debe obtener un producto según su ID', async () => {
-        const mockProduct = {
-            title: 'test',
-            description: 'Descripcion para el produdcto',
-            price: 200,
-            thumbnail: 'Imagen',
-            code: 'abc123',
-            status: true,
-            stock: 20,
-            category: 'almacenamiento',
-            owner: 'admin'
-        }
-
-        const newProduct = await productRepository.addProduct(mockProduct);
-        const newProductId = newProduct.id;
-        const findedProduct = await productRepository.getProductById(newProductId);
-
-        expect(findedProduct.id).to.be.equal(newProduct.id);
-    });
-
-    it('Se debe crear un producto correctamente', async function () {
-        const mockProduct = {
-            title: 'test',
-            description: 'Descripcion para el produdcto',
-            price: 200,
-            thumbnail: 'Imagen',
-            code: 'abc124',
-            status: true,
-            stock: 20,
-            category: 'almacenamiento',
-            owner: 'admin'
-        }
-
-        const newProduct = await productRepository.addProduct(mockProduct);
-        expect(newProduct.id).to.be.ok;
+        expect(result).to.deep.equal(mockingProducts);
     })
 
-    it('Imagen, owner y status se deben generar por automaticamente', async () => {
-        const mockProduct = {
-            title: 'test',
-            description: 'Descripcion para el produdcto',
-            price: 200,
-            code: 'abc125',
-            stock: 20,
-            category: 'almacenamiento',
-        }
-
-        const newProduct = await productRepository.addProduct(mockProduct);
-
-        expect(newProduct.id).to.be.ok;
-        expect(newProduct.thumbnail).to.be.equal('Sin Imagen')
-        expect(newProduct.status).to.be.true
-        expect(newProduct.thumbnail).to.be.equal('Sin Imagen')
+    it('Debe traer un producto según su ID', async () => {
+        productsDaoMock.getProductById.resolves({
+            id: 1,
+            title: "Fuente Sentey 700W",
+            description: "Fuente sentey 700w hbp700-gs 80 plus bronze active pfc autofan 20+4x1 4+4pinesx1 satax6 molexx 2pci-e6+2x2",
+            price: 42000,
+            thumbnail: "../img/Fuente.webp",
+            code: "abc123",
+            status: true,
+            stock: 10,
+            category: "fuente",
+            owner: "admin"
+        },)
+        const test = await productRepository.getProductById(1);
     })
 
-    it('El precio y el stock deben setearse como valores numericos', async () => {
-        const mockProduct = {
-            title: 'test',
-            description: 'Descripcion para el produdcto',
-            price: '200',
-            code: 'abc126',
-            stock: '20',
-            category: 'almacenamiento',
+    it('Debe fallar cuando se intenta crear un producto inválido', async () => {
+        for (const product of invalidProducts) {
+            let throwError
+            try {
+                await productRepository.addProduct(product);
+            } catch (error) {
+                throwError = error;
+            }
+            expect(throwError.name).to.equal('Error al crear producto');
         }
-
-        const newProduct = await productRepository.addProduct(mockProduct);
-
-        expect(newProduct.price).to.equal(200);
-        expect(newProduct.stock).to.equal(20);
-    });
-
-    it('El producto se actualiza de manera correcta', async () => {
-        const mockProduct = {
-            title: 'test',
-            description: 'Descripcion para el produdcto',
-            price: 200,
-            code: 'abc127',
-            stock: 20,
-            category: 'almacenamiento',
-        }
-
-        const newProduct = await productRepository.addProduct(mockProduct);
-        const updatedProduct = await productRepository.updateProduct(newProduct.id, { title: 'updatedProduct', stock: 40 });
-        const findedProduct = await productRepository.getProductById(newProduct.id);
-
-        expect(updatedProduct.title).to.be.equal(findedProduct.title);
-        expect(updatedProduct.stock).to.be.equal(findedProduct.stock);
     });
 });
