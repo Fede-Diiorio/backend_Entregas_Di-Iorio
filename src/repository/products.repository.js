@@ -6,6 +6,9 @@ const { generateInvalidProductData } = require('../utils/errors/errors');
 class ProductRepository {
     #userDAO
     constructor(ProductDAO, UserDAO) {
+        /**
+         * @type ProductDAO
+         */
         this.productDAO = ProductDAO;
         this.#userDAO = UserDAO;
     }
@@ -89,7 +92,6 @@ class ProductRepository {
             });
         }
 
-        console.log(thumbnail);
         const finalThumbnail = thumbnail ? `../products/${thumbnail.originalname}` : 'Sin Imagen';
 
         const finalStatus = stock >= 1 ? true : false;
@@ -202,16 +204,72 @@ class ProductRepository {
     async addProduct(productData) {
         try {
             const { title, description, price, thumbnail, code, stock, category, owner } = productData;
-            const productHandler = await this.#validateAndFormatAddProductsParams(title, description, price, thumbnail, code, stock, category, owner);
-            const product = await this.productDAO.addProduct(productHandler);
+            console.log(title, description);
+
+            const invalidOptions = isNaN(+price) || +price <= 0 || isNaN(+stock) || +stock < 0;
+
+            if (!title || !description || !code || !category || invalidOptions) {
+                throw CustomError.createError({
+                    name: 'Error al agregar el producto.',
+                    cause: generateInvalidProductData(title, description, price, thumbnail, code, stock, category),
+                    message: 'No se pudo agregar el producto a la base de datos.',
+                    code: ErrorCodes.INVALID_PRODUCT_DATA,
+                    status: 400
+                });
+            }
+
+            const finalThumbnail = thumbnail ? `../products/${thumbnail.originalname}` : 'Sin Imagen';
+
+            const finalStatus = stock >= 1 ? true : false;
+
+            const user = await this.#userDAO.findByEmail(owner);
+
+            if (user === null) {
+                throw CustomError.createError({
+                    name: 'Usuario inválido',
+                    cause: 'El email proporcionado no se encuentra registrado en la base de datos',
+                    message: 'El usuaior no existe',
+                    code: ErrorCodes.UNDEFINED_USER,
+                    status: 404
+                })
+            }
+
+            const finalOwner = user && user.rol === 'premium' ? user.email : 'admin';
+
+            const existingCode = await this.productDAO.findByCode(code);
+
+            if (existingCode) {
+                throw CustomError.createError({
+                    name: 'Error al agregar el producto.',
+                    cause: `El código de producto '${code}' ya está en uso. Ingrese un código diferente.`,
+                    message: 'Código de producto repetido.',
+                    code: ErrorCodes.DUPLICATE_PRODUCT_CODE,
+                    status: 409
+                });
+            }
+
+            const newProduct = {
+                title,
+                description,
+                price,
+                thumbnail: finalThumbnail,
+                code,
+                status: finalStatus,
+                stock,
+                category,
+                owner: finalOwner
+            };
+
+            const product = await this.productDAO.addProduct(newProduct);
+
             return new ProductDTO(product);
+
         } catch (error) {
             throw CustomError.createError({
-                name: 'Error al crear producto',
-                cause: 'No se pudo crear el producto por falta de datos o existe un problema para cargarlo a la base de datos',
-                message: 'No se pudo cargar el producto a la base de datos',
-                code: ErrorCodes.PRODUCT_CREATION_ERROR,
-                otherProblems: error,
+                name: error.name || 'Error al crear producto',
+                cause: error.cause || 'No se pudo crear el producto por falta de datos o existe un problema para cargarlo a la base de datos',
+                message: error.message || 'No se pudo cargar el producto a la base de datos',
+                code: error.code || ErrorCodes.PRODUCT_CREATION_ERROR,
                 status: error.status || 500
             })
         }
