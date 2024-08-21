@@ -1,10 +1,9 @@
 const passport = require('passport');
 const { UserRepository } = require('../repository/user.repository');
-const { localStrategy, githubStrategy, jwtStrategy } = require('./strategies');
+const { githubStrategy, jwtStrategy } = require('./strategies');
 
 const initializeStrategy = () => {
 
-    localStrategy();
     githubStrategy();
     jwtStrategy();
 
