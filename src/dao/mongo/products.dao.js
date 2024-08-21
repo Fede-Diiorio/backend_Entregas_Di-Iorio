@@ -1,8 +1,13 @@
 const { Products } = require('./models');
 
 class ProductDAO {
-    async getProducts(query, options) {
+    async getPaginateProducts(query, options) {
         const products = await Products.paginate(query, options);
+        return products || [];
+    }
+
+    async getProducts() {
+        const products = await Products.find();
         return products || [];
     }
 

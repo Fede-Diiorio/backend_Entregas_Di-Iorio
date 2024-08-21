@@ -5,7 +5,7 @@ class Controller {
         this.productRepository = new ProductRepository();
     }
 
-    async getProducts(req, res) {
+    async getPaginateProducts(req, res) {
         try {
             const page = req.query.page || 1;
             const limit = req.query.limit || 10;
@@ -13,12 +13,23 @@ class Controller {
             const category = req.query.category;
             const availability = req.query.availability;
 
-            const products = await this.productRepository.getProducts(page, limit, sort, category, availability);
+            const products = await this.productRepository.getPaginateProducts(page, limit, sort, category, availability);
             res.status(200).json(products);
         } catch (error) {
             req.logger.error(error);
             res.status(error.status).json({ error });
         }
+    }
+
+    async getProducts(req, res) {
+        try {
+            const products = await this.productRepository.getProducts();
+            res.status(200).json(products);
+        } catch (error) {
+            req.logger.error(error);
+            res.status(error.status).json({ error });
+        }
+
     }
 
     async getProductById(req, res) {

@@ -4,7 +4,6 @@ class CustomError {
         cause,
         message,
         code = 1,
-        otherProblems = 'No listados',
         status
 
     }) {
@@ -12,7 +11,6 @@ class CustomError {
         error.name = name;
         error.cause = cause;
         error.code = code;
-        error.otherProblems = otherProblems;
         error.status = status
         return error;
     }

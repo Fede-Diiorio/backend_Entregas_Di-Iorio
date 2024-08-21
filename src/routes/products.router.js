@@ -2,11 +2,15 @@ const { Router } = require('express'); // Importa la clase Router de Express par
 const router = Router(); // Crea un enrutador
 const { Controller } = require('../controller/products.controller');
 const { verifyToken } = require('../middlewares/jwt.middleware');
-const { isAdmin, isUser, isUserPremium } = require('../middlewares/auth.middleware');
+const { isAdmin, isUserPremium } = require('../middlewares/auth.middleware');
 const { productUploader } = require('../utils/multerUploader');
 
-// Ruta para obtener todos los produtos
+// Ruta para obtener todos los productos
+
 router.get('/', (req, res) => new Controller().getProducts(req, res));
+
+// Ruta para obtener todos los produtos y opciones de paginado
+router.get('/paginate', (req, res) => new Controller().getPaginateProducts(req, res));
 
 // Ruta para obtener un producto por su ID
 router.get('/:pid', async (req, res) => new Controller().getProductById(req, res));

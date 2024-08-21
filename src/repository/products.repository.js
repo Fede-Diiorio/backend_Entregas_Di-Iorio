@@ -43,41 +43,6 @@ class ProductRepository {
         }
     }
 
-    async #generatePageParams(page, limit, sort, category, availability) {
-
-        const { query, options } = this.#validateAndFormatGetProductsParams(page, limit, sort, category, availability);
-        const allProducts = await this.productDAO.getProducts(query, options);
-
-        if (isNaN(page) || page > allProducts.totalPages) {
-            throw CustomError.createError({
-                name: 'Error en el paginado',
-                cause: 'La página debe ser un número válido',
-                message: 'La página a la que intenta acceder no existe',
-                code: ErrorCodes.INVALID_PAGE_NUMBER,
-                status: 400
-            });
-        }
-
-        const status = allProducts ? 'success' : 'error';
-        const prevLink = allProducts.hasPrevPage ? `/products?page=${allProducts.prevPage}` : null;
-        const nextLink = allProducts.hasNextPage ? `/products?page=${allProducts.nextPage}` : null;
-
-        const result = {
-            status,
-            payload: allProducts.docs,
-            totalPages: allProducts.totalPages,
-            prevPage: allProducts.prevPage,
-            nextPage: allProducts.nextPage,
-            page: allProducts.page,
-            hasPrevPage: allProducts.hasPrevPage,
-            hasNextPage: allProducts.hasNextPage,
-            prevLink,
-            nextLink
-        };
-        return result;
-
-    }
-
     async #validateAndFormatAddProductsParams(title, description, price, thumbnail, code, stock, category, owner) {
 
         const invalidOptions = isNaN(+price) || +price <= 0 || isNaN(+stock) || +stock < 0;
@@ -127,10 +92,26 @@ class ProductRepository {
         return newProduct;
     }
 
-    async getProducts(page, limit, sort, category, availability) {
+    async getProducts() {
+        try {
+            const products = await this.productDAO.getProducts();
+            const productsPayload = products.map(prod => new ProductDTO(prod));
+            return productsPayload;
+        } catch (error) {
+            throw CustomError.createError({
+                name: error.name || 'Error al conectar',
+                cause: error.cause || 'Ocurrió un error al buscar los productos en la base de datos',
+                message: error.message || 'No se pudieron obtener los productos de la base de datos',
+                code: error.code || ErrorCodes.DATABASE_ERROR,
+                status: error.status || 500
+            });
+        }
+    }
+
+    async getPaginateProducts(page, limit, sort, category, availability) {
         try {
             const { query, options } = this.#validateAndFormatGetProductsParams(page, limit, sort, category, availability);
-            const products = await this.productDAO.getProducts(query, options);
+            const products = await this.productDAO.getPaginateProducts(query, options);
 
             if (!products || !products.docs.length) {
                 return [];
@@ -146,7 +127,8 @@ class ProductRepository {
                 });
             }
 
-            return products.docs.map(product => new ProductDTO(product));
+
+            return products;
 
         } catch (error) {
             throw CustomError.createError({
@@ -155,21 +137,6 @@ class ProductRepository {
                 message: error.message || 'No se pudieron obtener los productos de la base de datos',
                 code: error.code || ErrorCodes.DATABASE_ERROR,
                 status: error.status || 500
-            });
-        }
-    }
-
-    async getProductsForView(page, limit, sort, category, availability) {
-        try {
-            const products = await this.#generatePageParams(page, limit, sort, category, availability);
-            return products;
-        } catch {
-            throw CustomError.createError({
-                name: 'Error de paginado',
-                cause: 'Ocurrió un error al buscar los productos en la base de datos o crear la paginacion para los mismos',
-                message: 'Error de paginado',
-                code: ErrorCodes.INVALID_PAGE_NUMBER,
-                status: 400
             });
         }
     }
