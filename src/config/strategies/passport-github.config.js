@@ -1,10 +1,12 @@
-const passport = require('passport');
-const { Strategy } = require('passport-github2');
-const { verifyToken } = require('../../middlewares/jwt.middleware');
-const { clientID, clientSecret, callbackURL } = require('../github.private');
-const { UserRepository } = require('../../repository/user.repository');
+import passport from 'passport';
+import { Strategy } from 'passport-github2';
+import { verifyToken } from '../../middlewares/jwt.middleware.js';
+import config from '../github.private.js'
+import UserRepository from '../../repository/user.repository.js';
 
-const githubStrategy = () => {
+const { clientID, clientSecret, callbackURL } = config;
+
+export const githubStrategy = () => {
 
     passport.use('github', new Strategy({ clientID, clientSecret, callbackURL },
         async (_accessToken, _refreshToken, profile, done) => {
@@ -20,9 +22,7 @@ const githubStrategy = () => {
                 });
             } catch (e) {
                 done(e);
-            }
-        }
+            };
+        },
     ));
-}
-
-module.exports = githubStrategy
+};

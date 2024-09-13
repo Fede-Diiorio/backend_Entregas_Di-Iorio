@@ -1,7 +1,9 @@
-const session = require('express-session');
-const defaultOptions = require('./defaultOptions');
-const MongoStore = require('connect-mongo');
-const { dbName, mongoUrl } = require('../dbconfig');
+import session from 'express-session';
+import defaultOptions from './defaultOptions.js';
+import MongoStore from 'connect-mongo';
+import config from '../dbconfig.js';
+
+const { mongoUrl, dbName } = config;
 
 const storage = MongoStore.create({
     dbName,
@@ -9,7 +11,7 @@ const storage = MongoStore.create({
     ttl: 60 * 10
 })
 
-module.exports = session({
+export default session({
     store: storage,
     ...defaultOptions
-})
+});

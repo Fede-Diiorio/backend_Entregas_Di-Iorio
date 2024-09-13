@@ -1,12 +1,13 @@
-require('dotenv').config(); // Carga las variables de entorno desde .env
-const { Router } = require('express'); // Importa la clase Router de Express para definir las rutas
+import 'dotenv/config';
+import { Router } from 'express';
+import passport from 'passport';
+import Controller from '../controller/sessions.controller.js';
+import { verifyToken, verifyPasswordToken } from '../middlewares/jwt.middleware.js';
+import { isSuperAdmin, isAdmin, isUser } from '../middlewares/auth.middleware.js';
+import { documentUploader, profileUploader } from '../utils/multerUploader.js';
+import { multerErrorHandler } from '../middlewares/multerErrorHandler.middleware.js';
+
 const router = Router(); // Crea un enrutador
-const passport = require('passport');
-const { Controller } = require('../controller/sessions.controller');
-const { verifyToken, verifyPasswordToken } = require('../middlewares/jwt.middleware');
-const { isSuperAdmin, isUser, isAdmin } = require('../middlewares/auth.middleware');
-const { documentUploader, profileUploader } = require('../utils/multerUploader');
-const { multerErrorHandler } = require('../middlewares/multerErrorHandler.middleware');
 
 router.post('/register', async (req, res) => new Controller().registerUser(req, res));
 
@@ -40,4 +41,4 @@ router.get('/', verifyToken, isAdmin, async (req, res) => new Controller().getUs
 
 router.delete('/', verifyToken, isAdmin, async (req, res) => new Controller().deleteUsers(req, res));
 
-module.exports = router;
+export default router;

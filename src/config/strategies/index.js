@@ -1,4 +1,7 @@
-module.exports = {
-    githubStrategy: require('./passport-github.config'),
-    jwtStrategy: require('./passport-jwt.config'),
-}
+import { githubStrategy } from './passport-github.config.js';
+import { jwtStrategy } from './passport-jwt.config.js';
+
+export {
+    githubStrategy,
+    jwtStrategy
+};

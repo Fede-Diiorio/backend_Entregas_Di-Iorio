@@ -1,8 +1,6 @@
-const { logger } = require('../utils/logger');
+import { logger } from '../utils/logger.js';
 
-module.exports = {
-    useLogger: (req, res, next) => {
-        req.logger = logger;
-        next();
-    }
-}
+export const useLogger = (req, _, next) => {
+    req.logger = logger;
+    next();
+};

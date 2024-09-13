@@ -1,5 +1,6 @@
-require('dotenv').config(); // Carga las variables de entorno desde .env
-module.exports = {
+import 'dotenv/config';
+
+export default {
     dbName: process.env.MONGO_DBNAME,
     mongoUrl: process.env.MONGO_URL
-}
+};

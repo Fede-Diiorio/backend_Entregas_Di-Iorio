@@ -1,6 +1,7 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
+
     firstName: String,
     lastName: String,
     age: Number,
@@ -8,17 +9,21 @@ const schema = new mongoose.Schema({
         type: String,
         unique: true,
     },
+
     password: {
         type: String,
     },
+
     rol: {
         type: String,
         default: 'user'
     },
+
     cart: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Carts'
     },
+
     last_connection: String,
     documents: [
         {
@@ -27,7 +32,6 @@ const schema = new mongoose.Schema({
         }
     ],
     picture: String
+});
 
-})
-
-module.exports = mongoose.model('Users', schema, 'users')
+export default mongoose.model('Users', schema, 'users');

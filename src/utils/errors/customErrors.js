@@ -1,4 +1,4 @@
-class CustomError {
+export default class CustomError {
     static createError({
         name = 'Error',
         cause,
@@ -11,10 +11,7 @@ class CustomError {
         error.name = name;
         error.cause = cause;
         error.code = code;
-        error.status = status
+        error.status = status;
         return error;
-    }
-
-}
-
-module.exports = { CustomError };
+    };
+};

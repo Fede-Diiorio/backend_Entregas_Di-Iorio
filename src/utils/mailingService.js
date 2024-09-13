@@ -1,19 +1,18 @@
-require('dotenv').config();
-const { CustomError } = require('../utils/errors/customErrors');
-const { ErrorCodes } = require('../utils/errors/errorCodes');
-const nodemailer = require('nodemailer');
+import 'dotenv/config';
+import CustomError from '../utils/errors/customErrors.js';
+import { ErrorCodes } from '../utils/errors/errorCodes.js';
+import nodemailer from 'nodemailer';
 
-class MailingService {
-    constructor() { }
+export default class MailingService {
 
     async sendMail(email) {
         try {
             const randomNumber = Math.floor(1000000000 + Math.random() * 9000000000);
             const baseUrl = process.env.BASE_URL;
-            const port = process.env.PORT
-            const prodUrl = process.env.PROD_URL
+            const port = process.env.PORT;
+            const prodUrl = process.env.PROD_URL;
             const devLink = `${baseUrl}${port}/users/resetPassword/${randomNumber}`;
-            const prodLink = `${prodUrl}users/resetPassword/${randomNumber}`
+            const prodLink = `${prodUrl}users/resetPassword/${randomNumber}`;
             const currentUrl = process.env.LOGGER_ENV === 'production' ? prodLink : devLink;
 
             const transport = nodemailer.createTransport({
@@ -22,7 +21,7 @@ class MailingService {
                 auth: {
                     user: process.env.GOOGLE_MAIL,
                     pass: process.env.GOOGLE_PASS
-                }
+                },
             });
 
             await transport.sendMail({
@@ -38,7 +37,9 @@ class MailingService {
             </div>`,
                 attachments: []
             });
-            return { randomNumber, email }
+
+            return { randomNumber, email };
+
         } catch {
             throw CustomError.createError({
                 name: 'Error al restablecer contraseña',
@@ -46,9 +47,9 @@ class MailingService {
                 message: 'No se pudo enviar el email',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
-    }
+            });
+        };
+    };
 
     async sendDeletionNotification(email, firstName, lastName) {
         try {
@@ -58,7 +59,7 @@ class MailingService {
                 auth: {
                     user: process.env.GOOGLE_MAIL,
                     pass: process.env.GOOGLE_PASS
-                }
+                },
             });
 
             await transport.sendMail({
@@ -70,9 +71,11 @@ class MailingService {
                 <h2>Cuenta eliminada</h2>
                 <h4>Estimado ${firstName} ${lastName}, por medio de la presente le informamos que su cuenta ha sido eliminada de nuestro servicio de Ecommerce debido a inactividad en la misma.</h4>
             </div>`,
-                attachments: []
+                attachments: [],
             });
-            return { email }
+
+            return { email };
+
         } catch (error) {
             throw CustomError.createError({
                 name: 'Error al notificar a los usuarios',
@@ -80,9 +83,9 @@ class MailingService {
                 message: 'No se pudieron enviar los emails',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
-    }
+            });
+        };
+    };
 
     async sendNotificationOfProductRemoved(email, firstName, lastName, productName, productId) {
         try {
@@ -92,7 +95,7 @@ class MailingService {
                 auth: {
                     user: process.env.GOOGLE_MAIL,
                     pass: process.env.GOOGLE_PASS
-                }
+                },
             });
 
             await transport.sendMail({
@@ -104,9 +107,11 @@ class MailingService {
                 <h2>Cuenta eliminada</h2>
                 <h4>Estimado ${firstName} ${lastName}, por medio de la presente le informamos que su producto ${productName} ID: ${productId} fue eliminado de nuestro servicio de Ecommerce.</h4>
             </div>`,
-                attachments: []
+                attachments: [],
             });
-            return { email }
+
+            return { email };
+
         } catch (error) {
             throw CustomError.createError({
                 name: 'Error al notificar a los usuarios',
@@ -114,9 +119,9 @@ class MailingService {
                 message: 'No se pudieron enviar los emails',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
-    }
+            });
+        };
+    };
 
     async buyNotification(email, firstName, lastName, ticketId, amount) {
         try {
@@ -126,7 +131,7 @@ class MailingService {
                 auth: {
                     user: process.env.GOOGLE_MAIL,
                     pass: process.env.GOOGLE_PASS
-                }
+                },
             });
 
             await transport.sendMail({
@@ -138,9 +143,11 @@ class MailingService {
                 <h2>Cuenta eliminada</h2>
                 <h4>Estimado ${firstName} ${lastName}, por medio de la presente le informamos que su comprá por un total de $${amount} ha sido aprobada. Su código de compra es: ${ticketId}</h4>
             </div>`,
-                attachments: []
+                attachments: [],
             });
-            return { email }
+
+            return { email };
+
         } catch (error) {
             throw CustomError.createError({
                 name: 'Error al notificar la compra',
@@ -148,9 +155,7 @@ class MailingService {
                 message: 'No se pudo enviar el email de notificación de la compra',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
-    }
-}
-
-module.exports = { MailingService };
+            });
+        };
+    };
+};

@@ -1,12 +1,12 @@
-const { Router } = require('express'); // Importa la clase Router de Express para definir las rutas
+import { Router } from 'express';
+import Controller from '../controller/products.controller.js';
+import { verifyToken } from '../middlewares/jwt.middleware.js';
+import { isAdmin, isUserPremium } from '../middlewares/auth.middleware.js';
+import { productUploader } from '../utils/multerUploader.js';
+
 const router = Router(); // Crea un enrutador
-const { Controller } = require('../controller/products.controller');
-const { verifyToken } = require('../middlewares/jwt.middleware');
-const { isAdmin, isUserPremium } = require('../middlewares/auth.middleware');
-const { productUploader } = require('../utils/multerUploader');
 
 // Ruta para obtener todos los productos
-
 router.get('/', (req, res) => new Controller().getProducts(req, res));
 
 // Ruta para obtener todos los produtos y opciones de paginado
@@ -24,4 +24,4 @@ router.put('/:pid', verifyToken, isAdmin, async (req, res) => new Controller().u
 // Ruta para eliminar un producto por su ID
 router.delete('/:pid', verifyToken, isUserPremium, async (req, res) => new Controller().deleteProduct(req, res));
 
-module.exports = router; // Exporta el enrutador
+export default router; // Exporta el enrutador

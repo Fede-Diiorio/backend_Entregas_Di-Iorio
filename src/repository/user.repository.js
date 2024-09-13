@@ -1,16 +1,16 @@
-require('dotenv').config();
-const UserDAO = require('../dao/mongo/users.dao');
-const CartDAO = require('../dao/mongo/carts.dao');
-const { hashPassword, isValidPassword } = require('../utils/hashing');
-const { generateToken, generatePasswordRecoveryToken } = require('../middlewares/jwt.middleware');
-const { UserDTO } = require('../dto/user.dto');
-const { getUsersDTO } = require('../dto/getUsers.dto');
-const { CustomError } = require('../utils/errors/customErrors');
-const { ErrorCodes } = require('../utils/errors/errorCodes');
-const { generateInvalidCredentialsUserData } = require('../utils/errors/errors');
-const { MailingService } = require('../utils/mailingService');
+import 'dotenv/config';
+import UserDAO from '../dao/mongo/users.dao.js';
+import CartDAO from '../dao/mongo/carts.dao.js';
+import { hashPassword, isValidPassword } from '../utils/hashing.js';
+import { generateToken, generatePasswordRecoveryToken } from '../middlewares/jwt.middleware.js';
+import { UserDTO } from '../dto/user.dto.js';
+import { getUsersDTO } from '../dto/getUsers.dto.js';
+import CustomError from '../utils/errors/customErrors.js';
+import { ErrorCodes } from '../utils/errors/errorCodes.js';
+import { generateInvalidCredentialsUserData } from '../utils/errors/errors.js';
+import MailingService from '../utils/mailingService.js';
 
-class UserRepository {
+export default class UserRepository {
 
     #userDAO;
     #cartDAO;
@@ -42,7 +42,7 @@ class UserRepository {
             rol: 'superAdmin',
             documents: []
         };
-    }
+    };
 
     #validateLoginCredentials(email, password) {
         if (!email || !password) {
@@ -52,13 +52,14 @@ class UserRepository {
                 message: 'Debe ingresar un usuario y contraseña válidas',
                 code: ErrorCodes.INVALID_CREDENTIALS,
                 status: 401
-            })
-        }
-    }
+            });
+        };
+    };
 
     async #generateNewUser(firstName, lastName, age, email, password, cart) {
         try {
             this.#validateLoginCredentials(email, password);
+
             if (age <= 0) {
                 throw CustomError.createError({
                     name: 'Error en la edad',
@@ -66,8 +67,9 @@ class UserRepository {
                     message: 'Edad inválida',
                     code: ErrorCodes.AGE_VALIDATION_ERROR,
                     status: 400
-                })
-            }
+                });
+            };
+
             const hashedPassword = hashPassword(password);
 
             const user = {
@@ -80,6 +82,7 @@ class UserRepository {
             };
 
             return user;
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'Error de registro',
@@ -87,10 +90,9 @@ class UserRepository {
                 message: error.message || 'Algo salió mal al generar un nuevo usuario',
                 code: error.code || ErrorCodes.USER_REGISTER_ERROR,
                 status: error.status || 500
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     #generateAccessToken(user) {
         return generateToken({
@@ -104,12 +106,14 @@ class UserRepository {
             documents: user.documents,
             picture: user.picture
         });
-    }
+    };
 
     async #verifyUser(id) {
         try {
             const user = await this.#userDAO.findById(id);
-            return user
+
+            return user;
+
         } catch {
             throw CustomError.createError({
                 name: 'Usuario inválido',
@@ -117,7 +121,7 @@ class UserRepository {
                 message: 'ID desconocido',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
+            });
         };
     };
 
@@ -130,10 +134,11 @@ class UserRepository {
                     message: 'No tiene permisos para registrar estos usuarios',
                     code: ErrorCodes.ADMIN_USER_REGISTRATION_ERROR,
                     status: 400
-                })
-            }
+                });
+            };
 
             const existingUser = await this.#userDAO.findByEmail(email);
+
             if (existingUser) {
                 throw CustomError.createError({
                     name: 'Error de registro',
@@ -141,16 +146,19 @@ class UserRepository {
                     message: 'El email ya está registrado',
                     code: ErrorCodes.EMAIL_ALREADY_REGISTERED,
                     status: 409
-                })
-            }
+                });
+            };
 
             const cart = await this.#cartDAO.addCart({ products: [] });
             const user = await this.#generateNewUser(firstName, lastName, age, email, password, cart);
-            await this.#userDAO.create(user)
+
+            await this.#userDAO.create(user);
+
             const updateConnection = await this.#userDAO.findByEmail(email);
-            console.log(updateConnection);
             await this.updateConnection(updateConnection._id);
+
             return user;
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'Error de registro',
@@ -158,10 +166,9 @@ class UserRepository {
                 message: error.message || 'No se pudo crear un nuevo usuario',
                 code: error.code || ErrorCodes.USER_REGISTER_ERROR,
                 status: error.status || 500
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     async loginUser(email, password) {
         try {
@@ -170,9 +177,13 @@ class UserRepository {
             let user;
 
             if (email === this.#adminUser.email && password === this.#adminUser.password) {
+
                 user = this.#adminUser;
+
             } else if (email === this.#superAdminUser.email && password === this.#superAdminUser.password) {
+
                 user = this.#superAdminUser;
+
             } else {
                 user = await this.#userDAO.findByEmail(email);
 
@@ -183,9 +194,9 @@ class UserRepository {
                         message: 'Contraseña incorrecta',
                         code: ErrorCodes.INVALID_PASSWORD,
                         status: 401
-                    })
-                }
-            }
+                    });
+                };
+            };
 
             const date = new Date();
             await this.#userDAO.lastConnection(email, date);
@@ -195,6 +206,7 @@ class UserRepository {
             const accessToken = this.#generateAccessToken(userPayload);
 
             return { accessToken, userPayload };
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'Error de logeo',
@@ -202,10 +214,9 @@ class UserRepository {
                 message: error.message || 'Contraseña incorrecta',
                 code: error.code || ErrorCodes.USER_LOGIN_ERROR,
                 status: error.status || 500
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     async sendMailToResetPassword(email) {
         if (!email) {
@@ -215,8 +226,8 @@ class UserRepository {
                 message: 'Debe ingresar un email',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
+            });
+        };
 
         const user = await this.#userDAO.findByEmail(email);
 
@@ -228,16 +239,16 @@ class UserRepository {
                     message: 'El email no se encuentra registrado',
                     code: ErrorCodes.UNDEFINED_USER,
                     status: 404
-                })
-            }
-        }
+                });
+            };
+        };
 
         const passToken = (await new MailingService().sendMail(email));
 
         const handlerPassToken = generatePasswordRecoveryToken(passToken.randomNumber, passToken.email);
 
         return handlerPassToken;
-    }
+    };
 
     async resetPassword(urlToken, token, newPassword, confirmPassword) {
         const { code, email } = token;
@@ -249,8 +260,8 @@ class UserRepository {
                 message: 'Debe completar todos los cambios',
                 code: ErrorCodes.PASSWORD_UPDATE_ERROR,
                 status: 400
-            })
-        }
+            });
+        };
 
         const isValidToken = urlToken === code.toString();
 
@@ -261,8 +272,8 @@ class UserRepository {
                 message: 'El link no es válido o ha expirado.',
                 code: ErrorCodes.PASSWORD_UPDATE_ERROR,
                 status: 410
-            })
-        }
+            });
+        };
 
         if (newPassword !== confirmPassword) {
             throw CustomError.createError({
@@ -271,8 +282,8 @@ class UserRepository {
                 message: 'Las dos contraseñas no coinciden',
                 code: ErrorCodes.PASSWORD_UPDATE_ERROR,
                 status: 400
-            })
-        }
+            });
+        };
 
         const user = await this.#userDAO.findByEmail(email);
 
@@ -285,18 +296,17 @@ class UserRepository {
                 message: 'Debe actualizar su contraseña',
                 code: ErrorCodes.PASSWORD_UPDATE_ERROR,
                 status: 400
-            })
-        }
+            });
+        };
 
         const updatedUser = await this.#userDAO.updatePassword(email, hashPassword(newPassword));
 
         return updatedUser;
 
-    }
+    };
 
     async githubLogin(profile) {
         try {
-
             if (profile._json.email === null) {
                 throw CustomError.createError({
                     name: 'Email inválido',
@@ -304,8 +314,8 @@ class UserRepository {
                     message: 'Hubo un problema con su cuenta de github',
                     code: ErrorCodes.GITHUB_LOGIN_ERROR,
                     status: 400
-                })
-            }
+                });
+            };
 
             const user = await this.#userDAO.findByEmail(profile._json.email);
 
@@ -324,10 +334,12 @@ class UserRepository {
                 const accessToken = this.#generateAccessToken(newUser);
 
                 return { accessToken, user: newUser };
-            }
+            };
 
             const accessToken = this.#generateAccessToken(user);
+
             return { accessToken, user };
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'Error de logeo',
@@ -335,17 +347,19 @@ class UserRepository {
                 message: error.message || 'Hubo un problema con su cuenta de github',
                 code: error.code || ErrorCodes.GITHUB_LOGIN_ERROR,
                 status: error.status || 500
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     async deleteUser(email) {
         try {
             const user = await this.#userDAO.findByEmail(email);
+
             if (user) {
+
                 await this.#cartDAO.deleteCart(user.cart);
                 await this.#userDAO.deleteByEmail(email);
+
             } else {
                 throw CustomError.createError({
                     name: 'Email desconocido',
@@ -353,8 +367,9 @@ class UserRepository {
                     message: 'El email no se encuentra registrado',
                     code: ErrorCodes.UNDEFINED_USER,
                     status: 404
-                })
-            }
+                });
+            };
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'Error al eliminar el usuario',
@@ -362,21 +377,24 @@ class UserRepository {
                 message: error.message || 'Hubo un problema y no se pudo elimiar el usuario',
                 code: error.code || ErrorCodes.USER_DELETION_ERROR,
                 status: error.status || 500
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     async getUserById(id) {
         try {
             if (id === 'admin') {
                 return new UserDTO(this.#adminUser);
+
             } else if (id === 'superAdmin') {
                 return new UserDTO(this.#superAdminUser);
+
             } else {
                 const user = await this.#userDAO.findById(id);
+
                 return new UserDTO(user);
-            }
+            };
+
         } catch {
             throw CustomError.createError({
                 name: 'Email desconocido',
@@ -384,21 +402,26 @@ class UserRepository {
                 message: 'El email no se encuentra registrado',
                 code: ErrorCodes.UNDEFINED_USER,
                 status: 404
-            })
-        }
-    }
+            });
+        };
+    };
 
     async changeRole(id) {
         try {
             const user = await this.#verifyUser(id);
+
             if (user.rol === 'user' && user.documents.length === 3) {
                 await this.#userDAO.updateRole(user.email, 'premium');
                 const updatedUser = await this.#userDAO.findById(id);
+
                 return new UserDTO(updatedUser);
+
             } else if (user.rol === 'premium') {
                 await this.#userDAO.updateRole(user.email, 'user');
                 const updatedUser = await this.#userDAO.findById(id);
+
                 return new UserDTO(updatedUser);
+
             } else {
                 throw CustomError.createError({
                     name: 'No se puede actualizar',
@@ -406,8 +429,9 @@ class UserRepository {
                     message: 'Falta de documentación',
                     code: ErrorCodes.UNDEFINED_DATA,
                     status: 400
-                })
-            }
+                });
+            };
+
         } catch (error) {
             throw CustomError.createError({
                 name: error.name || 'No se puede actualizar el rol',
@@ -415,18 +439,18 @@ class UserRepository {
                 message: error.message || 'Ocurrió un error inesperado',
                 code: error.code || ErrorCodes.UNDEFINED_DATA,
                 status: error.status || 400
-            })
-        }
-
-    }
+            });
+        };
+    };
 
     async updateConnection(id) {
         const user = await this.#userDAO.findById(id);
+
         if (user) {
             const date = new Date();
-            await this.#userDAO.lastConnection(user.email, date)
-        }
-    }
+            await this.#userDAO.lastConnection(user.email, date);
+        };
+    };
 
     async updateUserDocuments(userId, files) {
         const user = await this.#verifyUser(userId);
@@ -439,7 +463,7 @@ class UserRepository {
                 code: ErrorCodes.UNDEFINED_DATA,
                 status: 400
             });
-        }
+        };
 
         const newDocuments = [];
 
@@ -448,19 +472,21 @@ class UserRepository {
                 name: 'identification',
                 reference: `/public/documents/${files.identification[0].filename}`
             });
-        }
+        };
+
         if (files.proofOfAddress) {
             newDocuments.push({
                 name: 'proofOfAddress',
                 reference: `/public/documents/${files.proofOfAddress[0].filename}`
             });
-        }
+        };
+
         if (files.proofOfAccount) {
             newDocuments.push({
                 name: 'proofOfAccount',
                 reference: `/public/documents/${files.proofOfAccount[0].filename}`
             });
-        }
+        };
 
         const updatedDocuments = user.documents.filter(doc => !newDocuments.some(newDoc => newDoc.name === doc.name));
         updatedDocuments.push(...newDocuments);
@@ -468,7 +494,7 @@ class UserRepository {
         await this.#userDAO.updateDocuments(userId, updatedDocuments);
 
         return await this.#userDAO.findById(userId);
-    }
+    };
 
     async updatePicture(userId, file) {
         await this.#verifyUser(userId);
@@ -480,16 +506,17 @@ class UserRepository {
                 message: 'No puede enviar un formaulario vacio',
                 code: ErrorCodes.UNDEFINED_DATA,
                 status: 400
-            })
-        }
+            });
+        };
 
-        const picture = `/public/profile/${file.filename}`
+        const picture = `/public/profile/${file.filename}`;
 
         await this.#userDAO.updatePicture(userId, picture);
-    }
+    };
 
     async getUsers() {
         const users = await this.#userDAO.findAll();
+
         if (!users) {
             throw CustomError.createError({
                 name: 'Error de usuarios',
@@ -498,10 +525,12 @@ class UserRepository {
                 code: ErrorCodes.DATABASE_ERROR,
                 status: 500
             })
-        }
+        };
+
         const usersPayload = users.map(user => new getUsersDTO(user));
+
         return usersPayload;
-    }
+    };
 
     async deleteUsers() {
         const users = await this.#userDAO.findAll();
@@ -516,7 +545,7 @@ class UserRepository {
 
             if (timeDifference > thirtyMinutesInMs) {
                 inactiveUsers.push(user);
-            }
+            };
         });
 
         for (const user of inactiveUsers) {
@@ -524,10 +553,8 @@ class UserRepository {
             await this.#cartDAO.getCartById(user.cart);
 
             await new MailingService().sendDeletionNotification(user.email, user.firstName, user.lastName);
-        }
+        };
 
         return inactiveUsers;
-    }
-}
-
-module.exports = { UserRepository };
+    };
+};

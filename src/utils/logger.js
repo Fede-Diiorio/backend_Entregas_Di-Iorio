@@ -1,5 +1,5 @@
-require('dotenv').config();
-const winston = require('winston');
+import 'dotenv/config';
+import winston from 'winston';
 
 const customLevelsOptions = {
     levels: {
@@ -21,30 +21,28 @@ const devLogger = winston.createLogger({
     levels: customLevelsOptions.levels,
     format: winston.format.combine(
         winston.format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
-        logFormat
+        logFormat,
     ),
     transports: [
         new winston.transports.Console()
-    ]
+    ],
 });
 
 const prodLogger = winston.createLogger({
     levels: customLevelsOptions.levels,
     format: winston.format.combine(
         winston.format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
-        logFormat
+        logFormat,
     ),
     transports: [
         new winston.transports.Console({ level: 'info' }),
-        new winston.transports.File({ filename: './errors.log', level: 'error' })
-    ]
+        new winston.transports.File({ filename: './errors.log', level: 'error' }),
+    ],
 });
 
-const logger = process.env.LOGGER_ENV === 'production' ? prodLogger : devLogger;
+export const logger = process.env.LOGGER_ENV === 'production' ? prodLogger : devLogger;
 if (process.env.LOGGER_ENV === 'production') {
     console.log('Cargando el proyecto en modo de producción');
 } else {
     console.log('Cargando el proyecto en modo de desarrollo');
-}
-
-module.exports = { logger };
+};

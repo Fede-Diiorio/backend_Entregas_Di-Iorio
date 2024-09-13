@@ -1,10 +1,10 @@
-const generateInvalidCredentialsUserData = ({ email, password }) => {
+export const generateInvalidCredentialsUserData = ({ email, password }) => {
     return `Credenciales de usuario inválidas:
     * email: No puede enviar un string vacio ${email}(${typeof email})
     * password: No puede enviar un string vacio ${password} (${typeof password})`
-}
+};
 
-const generateInvalidProductData = (title, description, price, thumbnail, code, stock, category) => {
+export const generateInvalidProductData = (title, description, price, thumbnail, code, stock, category) => {
     return `
         Datos del producto inválidos:
         * título: ${!title ? 'No puede enviar un string vacío' : 'Válido'} (${title})
@@ -15,6 +15,4 @@ const generateInvalidProductData = (title, description, price, thumbnail, code, 
         * stock: ${isNaN(+stock) || +stock < 0 ? 'Debe ser un número mayor o igual a 0' : 'Válido'} (${stock})
         * categoría: ${!category ? 'No puede enviar un string vacío' : 'Válido'} (${category})
     `;
-}
-
-module.exports = { generateInvalidCredentialsUserData, generateInvalidProductData };
+};

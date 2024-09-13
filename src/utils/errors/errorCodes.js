@@ -1,4 +1,4 @@
-const ErrorCodes = {
+export const ErrorCodes = {
     DATABASE_ERROR: 1,                  // Error al interactuar con la base de datos
     UNDEFINED_CART: 2,                  // El carrito no existe
     UNDEFINED_PRODUCT: 3,               // El producto no existe
@@ -28,5 +28,3 @@ const ErrorCodes = {
     INVALID_QUANTITY: 27,               // Debe ingresar un valor numerico mayor a 0
     UNDEFINED_DATA: 28,                 // No puede enviar un formaulario vacio
 };
-
-module.exports = { ErrorCodes };

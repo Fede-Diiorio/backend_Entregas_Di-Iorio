@@ -1,4 +1,4 @@
-class ProductDTO {
+export class ProductDTO {
     constructor({ title, description, price, thumbnail, code, status, stock, category, id, owner }) {
         this.title = title;
         this.description = description;
@@ -10,7 +10,5 @@ class ProductDTO {
         this.category = category;
         this.owner = owner;
         this.id = id;
-    }
-}
-
-module.exports = { ProductDTO };
+    };
+};

@@ -1,5 +1,9 @@
-module.exports = {
-    productsRouter: require('./products.router'),
-    cartRouter: require('./cart.router'),
-    sessionRouter: require('./session.router'),
-}
+import productRouter from './products.router.js';
+import cartRouter from './cart.router.js';
+import sessionRouter from './session.router.js';
+
+export {
+    productRouter,
+    cartRouter,
+    sessionRouter
+};

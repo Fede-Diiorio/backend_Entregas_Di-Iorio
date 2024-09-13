@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate-v2');
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const schema = new mongoose.Schema({
 
@@ -48,13 +48,13 @@ const schema = new mongoose.Schema({
     owner: {
         type: String,
         default: "admin"
-    }
+    },
 });
 
 schema.virtual('id').get(function () {
-    return this._id.toString()
+    return this._id.toString();
 });
 
 schema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model('Products', schema, 'products');
+export default mongoose.model('Products', schema, 'products');
