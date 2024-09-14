@@ -1,4 +1,7 @@
-module.exports = {
-    invalidProducts: require('./invalidProducts'),
-    mockingProducts: require('./mockingProducts'),
-}
+import { invalidProducts } from './invalidProducts.js';
+import { mockingProducts } from './mockingProducts.js';
+
+export {
+    invalidProducts,
+    mockingProducts
+};

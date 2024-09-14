@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const { CartRepository } = require('../../src/repository/carts.repository');
-const { ProductRepository } = require('../../src/repository/products.repository');
+import mongoose from 'mongoose';
+import CartRepository from '../../src/repository/carts.repository.js';
+import ProductRepository from '../../src/repository/products.repository.js';
 
 describe('Testing Carts Repository', () => {
     let chai;

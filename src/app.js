@@ -68,7 +68,4 @@ const startServer = async () => {
     };
 };
 
-// Llamar a la función de inicio solo si el archivo es el principal
-if (import.meta.url === `file://${path.resolve(__filename)}`) {
-    startServer();
-}
+startServer();

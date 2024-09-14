@@ -1,4 +1,4 @@
-const products = [
+export const mockingProducts = [
     {
         id: 1,
         title: "Fuente Sentey 700W",
@@ -132,5 +132,3 @@ const products = [
         owner: "admin"
     }
 ];
-
-module.exports = products;

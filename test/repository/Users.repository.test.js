@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const { UserRepository } = require('../../src/repository/user.repository');
-const { isValidPassword } = require('../../src/utils/hashing');
+import mongoose from 'mongoose';
+import UserRepository from '../../src/repository/user.repository.js';
+import { isValidPassword } from '../../src/utils/hashing.js';
 
 describe('Testing Users Repository', () => {
     let chai;

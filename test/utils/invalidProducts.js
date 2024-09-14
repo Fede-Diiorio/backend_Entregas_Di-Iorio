@@ -1,4 +1,4 @@
-const invalidProducts = [
+export const invalidProducts = [
     // Producto vacío
     {},
     // Producto sin título
@@ -106,5 +106,3 @@ const invalidProducts = [
         owner: "owner@example.com"
     }
 ];
-
-module.exports = invalidProducts;

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { ProductRepository } = require('../../src/repository/products.repository');
+import mongoose from 'mongoose';
+import ProductRepository from '../../src/repository/products.repository.js';
 
 describe('Testing Product Repository', () => {
     let chai;

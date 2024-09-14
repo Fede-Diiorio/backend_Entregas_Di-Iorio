@@ -1,11 +1,11 @@
-require('dotenv').config();
-const PORT = process.env.PORT || 3000;
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import supertest from 'supertest';
+import app from '../../src/app.js';
+import path from 'path';
 
-const mongoose = require('mongoose');
-const supertest = require('supertest');
-const app = require('../../src/app');
+const PORT = process.env.PORT || 3000;
 const requester = supertest(`http://localhost:${PORT}`);
-const path = require('path');
 
 let chai;
 let expect;
